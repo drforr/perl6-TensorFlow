@@ -1,0 +1,29 @@
+{
+   "meta6" : "0",
+   "tags" : [
+      "ML",
+      "MachineLearning"
+   ],
+   "provides" : {
+      "TensorFlow" : "lib/TensorFlow.pm6"
+   },
+   "test-depends" : [
+   ],
+   "support" : {
+      "source" : "https://github.com/drforr/perl6-TensorFlow"
+   },
+   "perl" : "6.c",
+   "build-depends" : [],
+   "auth" : "github:drforr",
+   "source-url" : "https://github.com/drforr/perl6-TensorFlow.git",
+   "depends" : [
+      "Inline::Python"
+   ],
+   "name" : "TensorFlow",
+   "authors" : [
+      "Jeffrey Goff <drforr@pobox.com>"
+   ],
+   "version" : "0.0.1",
+   "license" : "Artistic-2.0",
+   "description" : "TensorFlow binding for Perl 6"
+}
