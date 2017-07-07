@@ -63,6 +63,85 @@ class TensorFlow {
 
 	has $.ip = Inline::Python.new;
 
+	method test {
+		$.ip.run( q:to[_END_] );
+import numpy as np
+import tensorflow as tf
+
+class TensorFlow:
+	def float32(self):
+		return tf.float32
+	def Variable(self,value,type):
+		return tf.Variable(value,dtype=type)
+	def run(self,my_W,my_b,my_type):
+		# Model parameters
+		#
+		#W = tf.Variable([.3], dtype=tf.float32)
+		#W = tf.Variable([my_W], dtype=tf.float32)
+		#W = tf.Variable(my_W, dtype=tf.float32)
+		#W = tf.Variable(my_W, dtype=my_type)
+		W = my_W
+
+		#b = tf.Variable([-.3], dtype=tf.float32)
+		#b = tf.Variable([my_b], dtype=tf.float32)
+		#b = tf.Variable(my_b, dtype=tf.float32)
+		#b = tf.Variable(my_b, dtype=my_type)
+		b = my_b
+
+		# Model input and output
+		#
+		x = tf.placeholder(tf.float32)
+		linear_model = W * x + b
+		y = tf.placeholder(tf.float32)
+
+		# loss
+		#
+		# sum of the squares
+		#
+		loss = tf.reduce_sum(tf.square(linear_model - y))
+
+		# optimizer
+		#
+		optimizer = tf.train.GradientDescentOptimizer(0.01)
+		train = optimizer.minimize(loss)
+
+		# training data
+		#
+		x_train = [1,2,3,4]
+		y_train = [0,-1,-2,-3]
+
+		# training loop
+		#
+		init = tf.global_variables_initializer()
+		sess = tf.Session()
+		sess.run(init)
+
+		# reset values to wrong
+		#
+		for i in range(1000):
+		  sess.run(train, {x:x_train, y:y_train})
+
+		# evaluate training accuracy
+		#
+		curr_W, curr_b, curr_loss = sess.run([W, b, loss], {x:x_train, y:y_train})
+		print("W: %s b: %s loss: %s"%(curr_W, curr_b, curr_loss))
+#		print("W: %s b: %s loss: %s"%(W, b, loss))
+
+#		return loss
+_END_
+
+		my $foo = $.ip.call('__main__', 'TensorFlow');
+		my $float = $foo.float32();
+		my $W = $foo.Variable( [ 0.3 ], $float );
+		my $b = $foo.Variable( [ -0.3 ], $float );
+		$foo.run(
+			my_W => $W,
+			my_b => $b,
+			my_type => $float
+		);
+	}
+
+#`(
 	method float32 {
 		$.ip.invoke(
 			'__main__', 'tf_wrapper', '_float32'
@@ -98,6 +177,7 @@ class tf_wrapper:
 		#W = tf.Variable([.3], dtype=tf.float32)
 		#W = tf.Variable(xxx, dtype=tf.float32)
 		W = tf.Variable(xxx, dtype=zzz)
+
 		#b = tf.Variable([-.3], dtype=tf.float32)
 		#b = tf.Variable(yyy, dtype=tf.float32)
 		b = tf.Variable(yyy, dtype=zzz)
@@ -140,6 +220,8 @@ class tf_wrapper:
 		curr_W, curr_b, curr_loss = sess.run([W, b, loss], {x:x_train, y:y_train})
 		print("W: %s b: %s loss: %s"%(curr_W, curr_b, curr_loss))
 		#return curr_W, curr_b, curr_loss
+
+		return curr_loss
 _END_
 
 #$ip.run('tf_wrapper.run()');
@@ -156,6 +238,7 @@ _END_
 		#W = tf.Variable([.3], dtype=tf.float32)
 
 		my $xxx = self.Variable( [ 0.3 ], $float32 );
+my $v =
 		$.ip.invoke( '__main__', 'tf_wrapper', 'run',
 			xxx => [ 0.3 ],
 			yyy => [ -0.3 ],
@@ -166,4 +249,5 @@ _END_
 	method run( $graph, $reference-variables ) {
 die;
 	}
+)
 }
