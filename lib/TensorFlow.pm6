@@ -71,10 +71,12 @@ _END_
 
 		$ip.run( q:to[_END_] );
 class TensorFlow:
-	def Variable(self,value):
-		return tf.Variable(value, dtype=tf.float32)
-	def placeholder(self):
-		return tf.placeholder(tf.float32)
+	def float32(self):
+		return tf.float32
+	def Variable(self,value,type):
+		return tf.Variable([value], dtype=type)
+	def placeholder(self,type):
+		return tf.placeholder(type)
 	def square(self,value):
 		return tf.square(value)
 	def reduce_sum(self,value):
@@ -83,38 +85,38 @@ class TensorFlow:
 		return tf.global_variables_initializer()
 	def Session(self):
 		return tf.Session()
-	def run(self,x,y,x_train,y_train,sess):
+
+	def _mul_(self,a,b):
+		return a.__mul__(b)
+	def _add_(self,a,b):
+		return a.__add__(b)
+	def _sub_(self,a,b):
+		return a.__sub__(b)
+	def run(self,x,y,x_train,y_train,sess,W,b,init,loss):
 		# Model parameters
-#		W = tf.Variable([.3], dtype=tf.float32)
-		W = self.Variable([.3])
-#		b = tf.Variable([-.3], dtype=tf.float32)
-		b = self.Variable([-.3])
+		# W
+		# b
 
 		# Model input and output
-#		x = tf.placeholder(tf.float32)
-#		x = self.placeholder()
-		linear_model = W * x + b
-#		y = tf.placeholder(tf.float32)
-#		y = self.placeholder()
+		# x
+		# y
+		# linear_model = W * x + b
 
-		# loss
-#		loss = tf.reduce_sum(tf.square(linear_model - y)) # sum of the squares
-#		loss = tf.reduce_sum(self.square(linear_model - y)) # sum of the squares
-		loss = self.reduce_sum(self.square(linear_model - y)) # sum of the squares
+		# loss = self.reduce_sum(self.square(linear_model - y)) # sum of the squares
+		# loss = self.reduce_sum(self.square(linear_model.__sub__(y))) # sum of the squares
+		# loss = self.reduce_sum(self.square(linear_model_y)) # sum of the squares
+		# loss = self.reduce_sum(square_linear_model_y) # sum of the squares
+		# loss = reduce_sum_square_linear_model_y # sum of the squares
+
+		# training set
+		# x_train
+		# y_train
 
 		# optimizer
 		optimizer = tf.train.GradientDescentOptimizer(0.01)
 		train = optimizer.minimize(loss)
 
-		# training data
-#		x_train = [1,2,3,4]
-#		y_train = [0,-1,-2,-3]
-
 		# training loop
-#		init = tf.global_variables_initializer()
-		init = self.global_variables_initializer()
-#		sess = tf.Session()
-#		sess = self.Session()
 		sess.run(init) # reset values to wrong
 		for i in range(1000):
 		  sess.run(train, {x:x_train, y:y_train})
@@ -125,12 +127,36 @@ class TensorFlow:
 _END_
 
 		my $foo = $ip.call('__main__', 'TensorFlow');
+
+		my $float32 = $foo.float32();
+
+		my $W = $foo.Variable(.3, $float32); # XXX [] here.
+		my $b = $foo.Variable(-.3, $float32);
+
+		my $x = $foo.placeholder($float32);
+		my $y = $foo.placeholder($float32);
+
+		my $linear_model = $foo._add_($foo._mul_($W,$x),$b);
+		my $linear_model_y = $foo._sub_($linear_model,$y);
+		my $sess = $foo.Session();
+		my $init = $foo.global_variables_initializer();
+		my $loss = $foo.reduce_sum($foo.square($linear_model_y));
+
 		$foo.run(
-			x => $foo.placeholder(),
-			y => $foo.placeholder(),
+			x => $x,
+			y => $y,
+
 			x_train => [ 1, 2, 3, 4 ],
 			y_train => [ 0, -1, -2, -3 ],
-			sess => $foo.Session()
+
+			sess => $sess,
+
+			W => $W,
+
+			b => $b,
+
+			init => $init,
+			loss => $loss
 		);
 	}
 }
