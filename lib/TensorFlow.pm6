@@ -92,7 +92,17 @@ class TensorFlow:
 		return a.__add__(b)
 	def _sub_(self,a,b):
 		return a.__sub__(b)
-	def run(self,x,y,x_train,y_train,sess,W,b,init,loss):
+
+	def train_GradientDescentOptimizer(self,value):
+		return tf.train.GradientDescentOptimizer(value)
+
+	def _run(self,sess,args,dict):
+		return sess.run(args,dict)
+
+	def _print(self,curr_W,curr_b,curr_loss):
+		print("W: %s b: %s loss: %s"%(curr_W, curr_b, curr_loss))
+		
+	def run(self,x,y,x_train,y_train,sess,W,b,loss,train):
 		# Model parameters
 		# W
 		# b
@@ -102,33 +112,40 @@ class TensorFlow:
 		# y
 		# linear_model = W * x + b
 
-		# loss = self.reduce_sum(self.square(linear_model - y)) # sum of the squares
-		# loss = self.reduce_sum(self.square(linear_model.__sub__(y))) # sum of the squares
-		# loss = self.reduce_sum(self.square(linear_model_y)) # sum of the squares
-		# loss = self.reduce_sum(square_linear_model_y) # sum of the squares
-		# loss = reduce_sum_square_linear_model_y # sum of the squares
+		# sum of squares
+		# loss = self.reduce_sum(self.square(linear_model - y))
+		# loss = self.reduce_sum(self.square(linear_model.__sub__(y)))
+		# loss = self.reduce_sum(self.square(linear_model_y))
+		# loss = self.reduce_sum(square_linear_model_y)
 
 		# training set
 		# x_train
 		# y_train
 
 		# optimizer
-		optimizer = tf.train.GradientDescentOptimizer(0.01)
-		train = optimizer.minimize(loss)
+		# optimizer = tf.train.GradientDescentOptimizer(0.01)
+		# optimizer = self.train_GradientDescentOptimizer(0.01)
+		# train = optimizer.minimize(loss)
 
 		# training loop
-		sess.run(init) # reset values to wrong
+		# sess.run(init) # reset values to wrong
 		for i in range(1000):
-		  sess.run(train, {x:x_train, y:y_train})
+			#sess.run(train, {x:x_train, y:y_train})
+			self._run(sess,train,{x:x_train, y:y_train})
 
 		# evaluate training accuracy
-		curr_W, curr_b, curr_loss = sess.run([W, b, loss], {x:x_train, y:y_train})
-		print("W: %s b: %s loss: %s"%(curr_W, curr_b, curr_loss))
+		#curr_W, curr_b, curr_loss = sess.run([W, b, loss], {x:x_train, y:y_train})
+		curr_W, curr_b, curr_loss = self._run(sess,[W, b, loss], {x:x_train, y:y_train})
+		#print("W: %s b: %s loss: %s"%(curr_W, curr_b, curr_loss))
+		self._print(curr_W, curr_b, curr_loss)
 _END_
 
 		my $foo = $ip.call('__main__', 'TensorFlow');
 
 		my $float32 = $foo.float32();
+
+		my $x_train = [ 1, 2, 3, 4 ];
+		my $y_train = [ 0, -1, -2, -3 ];
 
 		my $W = $foo.Variable(.3, $float32); # XXX [] here.
 		my $b = $foo.Variable(-.3, $float32);
@@ -141,13 +158,17 @@ _END_
 		my $sess = $foo.Session();
 		my $init = $foo.global_variables_initializer();
 		my $loss = $foo.reduce_sum($foo.square($linear_model_y));
+		my $optimizer = $foo.train_GradientDescentOptimizer(0.01);
+		my $train = $optimizer.minimize($loss);
+
+		$sess.run($init);
 
 		$foo.run(
 			x => $x,
 			y => $y,
 
-			x_train => [ 1, 2, 3, 4 ],
-			y_train => [ 0, -1, -2, -3 ],
+			x_train => $x_train,
+			y_train => $y_train,
 
 			sess => $sess,
 
@@ -155,8 +176,8 @@ _END_
 
 			b => $b,
 
-			init => $init,
-			loss => $loss
+			loss => $loss,
+			train => $train
 		);
 	}
 }
