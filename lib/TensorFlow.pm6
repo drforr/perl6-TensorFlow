@@ -56,10 +56,176 @@ my role Validating {
 #use numpy:from<Python>;
 #use tensorflow:from<Python>;
 
+# Notes for the internals:
+#
+# For Pete's sake don't use __ in method names, and don't use trailing '_'.
+# It's reserved for ... things that confuse python.
+#
 class TensorFlow {
 	also does Debugging;
 	also does Testing;
 	also does Validating;
+
+	method rebuild {
+		my $ip = Inline::Python.new;
+		$ip.run( q:to[_END_] );
+import numpy as np
+import tensorflow as tf
+_END_
+
+		$ip.run( q:to[_END_] );
+class TensorFlow:
+	def _Line1(self):
+		W = tf.Variable([.3], dtype=tf.float32)
+		return W
+	def _Line2(self):
+		b = tf.Variable([-.3], dtype=tf.float32)
+		return b
+	def _Line3(self):
+		x = tf.placeholder(tf.float32)
+		return x
+	def _Line4(self, W,x,b):
+		linear_model = W * x + b
+		return linear_model
+	def _Line5(self):
+		y = tf.placeholder(tf.float32)
+		return y
+	def _Line6(self, linear_model,y):
+		loss = tf.reduce_sum(tf.square(linear_model - y)) # sum of the squares
+		return loss
+	def _Line7(self):
+		optimizer = tf.train.GradientDescentOptimizer(0.01)
+		return optimizer
+	def _Line8(self, optimizer,loss):
+		train = optimizer.minimize(loss)
+		return train
+	def _Line9(self):
+		x_train = [1,2,3,4]
+		return x_train
+	def _Line10(self):
+		y_train = [0,-1,-2,-3]
+		return y_train
+	def _Line11(self):
+		init = tf.global_variables_initializer()
+		return init
+	def _Line12(self):
+		sess = tf.Session()
+		self.Session = sess
+		return sess
+	def _Line13(self, sess,init):
+		#sess.run(init) # reset values to wrong
+		self.Session.run(init) # reset values to wrong
+	def _thingie(self, x,x_train, y,y_train):
+		return {x:x_train, y:y_train}
+	def _Line14(self, sess,train,x,x_train,y,y_train):
+		print("name ********: %s"%(thingie))
+		for i in range(1000):
+			#sess.run(train, {x:x_train, y:y_train})
+			self.Session.run(train, {x:x_train, y:y_train})
+	def _Line14A(self, sess,train,thingie):
+		print("name ********: %s"%(thingie))
+		for i in range(1000):
+			#sess.run(train, {x:x_train, y:y_train})
+			self.Session.run(train, thingie)
+	def _Line15(self, sess,W,b,loss,x,x_train,y,y_train):
+		#curr_W, curr_b, curr_loss = sess.run([W, b, loss], {x:x_train, y:y_train})
+		curr_W, curr_b, curr_loss = self.Session.run([W, b, loss], {x:x_train, y:y_train})
+		return curr_W, curr_b, curr_loss
+	def _Line15A(self, sess,W,b,loss,thingie):
+		#curr_W, curr_b, curr_loss = sess.run([W, b, loss], {x:x_train, y:y_train})
+		curr_W, curr_b, curr_loss = self.Session.run([W, b, loss], thingie)
+		return curr_W, curr_b, curr_loss
+	def _Line16(self, curr_W,curr_b,curr_loss):
+		print("W: %s b: %s loss: %s"%(curr_W, curr_b, curr_loss))
+_END_
+
+#		my $tf = $ip.call('__main__', 'TensorFlow');
+
+		$ip.run( q:to[_END_] );
+my_tf = TensorFlow()
+_END_
+
+
+#		my $W = $tf._Line1();
+#		my $b = $tf._Line2();
+
+		# Model parameters
+		#
+		$ip.run( q:to[_END_] );
+W = my_tf._Line1()
+b = my_tf._Line2()
+_END_
+
+#		my $x = $tf._Line3();
+#		my $linear_model = $tf._Line4($W,$x,$b);
+#		my $y = $tf._Line5();
+
+		# Model input and output
+		#
+		$ip.run( q:to[_END_] );
+x = my_tf._Line3()
+linear_model = my_tf._Line4(W,x,b)
+y = my_tf._Line5()
+_END_
+
+#		my $loss = $tf._Line6($linear_model,$y);
+
+		# loss
+		#
+		$ip.run( q:to[_END_] );
+loss = my_tf._Line6(linear_model,y)
+_END_
+
+#		my $optimizer = $tf._Line7();
+#		my $train = $tf._Line8($optimizer,$loss);
+
+		# optimizer
+		#
+		$ip.run( q:to[_END_] );
+optimizer = my_tf._Line7()
+train = my_tf._Line8(optimizer,loss)
+_END_
+
+#		my $x_train = $tf._Line9();
+#		my $y_train = $tf._Line10();
+
+		# training data
+		#
+		$ip.run( q:to[_END_] );
+x_train = my_tf._Line9()
+y_train = my_tf._Line10()
+_END_
+
+#		my $init = $tf._Line11();
+#		my $sess = $tf._Line12();
+#		$tf._Line13($sess,$init);
+#my $thingie = $tf._thingie($x,$x_train,$y,$y_train);
+#		#$tf._Line14($sess,$train,$x,$x_train,$y,$y_train); # XXX ding
+#		$tf._Line14A($sess,$train,$thingie);
+
+		# training loop
+		#
+		$ip.run( q:to[_END_] );
+init = my_tf._Line11()
+sess = my_tf._Line12()
+my_tf._Line13(sess,init)
+thingie = my_tf._thingie(x,x_train,y,y_train)
+#my_tf._Line14(sess,train,x,x_train,y,y_train)
+my_tf._Line14A(sess,train,thingie)
+_END_
+
+##		my ( $curr_W, $curr_b, $curr_loss ) = $tf._Line15($sess,$W,$b,$loss,$x,$x_train,$y,$y_train);
+#		my ( $curr_W, $curr_b, $curr_loss ) = $tf._Line15A($sess,$W,$b,$loss,$thingie);
+#		$tf._Line16($curr_W,$curr_b,$curr_loss);
+
+		# evaluate training accuracy
+		#
+		$ip.run( q:to[_END_] );
+#curr_W, curr_b, curr_loss = my_tf._Line15(sess,W,b,loss,x,x_train,y,y_train)
+curr_W, curr_b, curr_loss = my_tf._Line15A(sess,W,b,loss,thingie)
+my_tf._Line16(curr_W,curr_b,curr_loss)
+_END_
+	}
 
 	method test( ) {
 		my $ip = Inline::Python.new;
@@ -99,6 +265,11 @@ class TensorFlow:
 	def _run(self,sess,args,dict):
 		return sess.run(args,dict)
 
+	def _loop(self,sess,train,x,x_train,y,y_train):
+		for i in range(1000):
+			#sess.run(train, {x:x_train, y:y_train})
+			self._run(sess,train,{x:x_train, y:y_train})
+
 	def _print(self,curr_W,curr_b,curr_loss):
 		print("W: %s b: %s loss: %s"%(curr_W, curr_b, curr_loss))
 		
@@ -129,9 +300,10 @@ class TensorFlow:
 
 		# training loop
 		# sess.run(init) # reset values to wrong
-		for i in range(1000):
-			#sess.run(train, {x:x_train, y:y_train})
-			self._run(sess,train,{x:x_train, y:y_train})
+		#for i in range(1000):
+		#	#sess.run(train, {x:x_train, y:y_train})
+		#	self._run(sess,train,{x:x_train, y:y_train})
+		#self._loop(1000,sess,train,x,x_train,y,y_train)
 
 		# evaluate training accuracy
 		#curr_W, curr_b, curr_loss = sess.run([W, b, loss], {x:x_train, y:y_train})
@@ -162,6 +334,8 @@ _END_
 		my $train = $optimizer.minimize($loss);
 
 		$sess.run($init);
+
+		$foo._loop($sess,$train,$x,$x_train,$y,$y_train);
 
 		$foo.run(
 			x => $x,

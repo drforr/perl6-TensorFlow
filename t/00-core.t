@@ -10,7 +10,8 @@ use Inline::Python;
 my $tf = TensorFlow.new;
 my $ip = Inline::Python.new;
 
-$tf.test();
+#$tf.test();
+$tf.rebuild;
 
 #`[
 
