@@ -74,6 +74,11 @@ import tensorflow as tf
 _END_
 
 		$ip.run( q:to[_END_] );
+class Shield:
+	def get(self):
+		return self.value
+	def set(self,value):
+		self.value = value
 class TensorFlow:
 	def _Line1(self):
 		W = tf.Variable([.3], dtype=tf.float32)
@@ -82,10 +87,13 @@ class TensorFlow:
 		b = tf.Variable([-.3], dtype=tf.float32)
 		return b
 	def _Line3(self):
-		x = tf.placeholder(tf.float32)
+		#x = tf.placeholder(tf.float32)
+		x = Shield();
+		x.set( tf.placeholder(tf.float32) )
 		return x
 	def _Line4(self, W,x,b):
-		linear_model = W * x + b
+		#linear_model = W * x + b
+		linear_model = W * x.get() + b
 		return linear_model
 	def _Line5(self):
 		y = tf.placeholder(tf.float32)
@@ -115,26 +123,27 @@ class TensorFlow:
 	def _Line13(self, sess,init):
 		#sess.run(init) # reset values to wrong
 		self.Session.run(init) # reset values to wrong
-	def _thingie(self, x,x_train, y,y_train):
-		return {x:x_train, y:y_train}
+#	def _thingie(self, x,x_train, y,y_train):
+#		return {x:x_train, y:y_train}
 	def _Line14(self, sess,train,x,x_train,y,y_train):
-		print("name ********: %s"%(thingie))
 		for i in range(1000):
 			#sess.run(train, {x:x_train, y:y_train})
-			self.Session.run(train, {x:x_train, y:y_train})
-	def _Line14A(self, sess,train,thingie):
-		print("name ********: %s"%(thingie))
-		for i in range(1000):
-			#sess.run(train, {x:x_train, y:y_train})
-			self.Session.run(train, thingie)
+			#self.Session.run(train, {x:x_train, y:y_train})
+			self.Session.run(train, {x.get():x_train, y:y_train})
+#	def _Line14A(self, sess,train,thingie):
+#		print("name ********: %s"%(thingie))
+#		for i in range(1000):
+#			#sess.run(train, {x:x_train, y:y_train})
+#			self.Session.run(train, thingie)
 	def _Line15(self, sess,W,b,loss,x,x_train,y,y_train):
 		#curr_W, curr_b, curr_loss = sess.run([W, b, loss], {x:x_train, y:y_train})
-		curr_W, curr_b, curr_loss = self.Session.run([W, b, loss], {x:x_train, y:y_train})
+		#curr_W, curr_b, curr_loss = self.Session.run([W, b, loss], {x:x_train, y:y_train})
+		curr_W, curr_b, curr_loss = self.Session.run([W, b, loss], {x.get():x_train, y:y_train})
 		return curr_W, curr_b, curr_loss
-	def _Line15A(self, sess,W,b,loss,thingie):
-		#curr_W, curr_b, curr_loss = sess.run([W, b, loss], {x:x_train, y:y_train})
-		curr_W, curr_b, curr_loss = self.Session.run([W, b, loss], thingie)
-		return curr_W, curr_b, curr_loss
+#	def _Line15A(self, sess,W,b,loss,thingie):
+#		#curr_W, curr_b, curr_loss = sess.run([W, b, loss], {x:x_train, y:y_train})
+#		curr_W, curr_b, curr_loss = self.Session.run([W, b, loss], thingie)
+#		return curr_W, curr_b, curr_loss
 	def _Line16(self, curr_W,curr_b,curr_loss):
 		print("W: %s b: %s loss: %s"%(curr_W, curr_b, curr_loss))
 _END_
@@ -209,9 +218,9 @@ _END_
 init = my_tf._Line11()
 sess = my_tf._Line12()
 my_tf._Line13(sess,init)
-thingie = my_tf._thingie(x,x_train,y,y_train)
-#my_tf._Line14(sess,train,x,x_train,y,y_train)
-my_tf._Line14A(sess,train,thingie)
+#thingie = my_tf._thingie(x,x_train,y,y_train)
+my_tf._Line14(sess,train,x,x_train,y,y_train)
+#my_tf._Line14A(sess,train,thingie)
 _END_
 
 ##		my ( $curr_W, $curr_b, $curr_loss ) = $tf._Line15($sess,$W,$b,$loss,$x,$x_train,$y,$y_train);
@@ -221,8 +230,8 @@ _END_
 		# evaluate training accuracy
 		#
 		$ip.run( q:to[_END_] );
-#curr_W, curr_b, curr_loss = my_tf._Line15(sess,W,b,loss,x,x_train,y,y_train)
-curr_W, curr_b, curr_loss = my_tf._Line15A(sess,W,b,loss,thingie)
+curr_W, curr_b, curr_loss = my_tf._Line15(sess,W,b,loss,x,x_train,y,y_train)
+#curr_W, curr_b, curr_loss = my_tf._Line15A(sess,W,b,loss,thingie)
 my_tf._Line16(curr_W,curr_b,curr_loss)
 _END_
 	}
