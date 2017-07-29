@@ -101,6 +101,12 @@ class TensorFlow::Session {
 	}
 	multi method run( $value ) {
 #warn "run c";
+		$.python.call(
+			'__main__',
+			'run_c',
+			self.value,
+			$value.value
+		)
 	}
 }
 
@@ -152,6 +158,12 @@ def minimize( optimizer, loss ):
 
 def global_variables_initializer():
 	return tf.global_variables_initializer()
+
+def Session():
+	return tf.Session()
+
+def run_c( sess, init ):
+	sess.run( init )
 _END_
 	}
 
@@ -274,6 +286,12 @@ _END_
 	}
 	method Session {
 #warn "Session";
-		return TensorFlow::Session.new( python => $.python )
+		return TensorFlow::Session.new(
+			python => $.python,
+			value => $.python.call(
+				'__main__',
+				'Session'
+			)
+		)
 	}
 }
